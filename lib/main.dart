@@ -1,4 +1,4 @@
-import 'package:bloc_finals_exam/cubit/theme_cubit.dart';
+import 'package:bloc_finals_exam/blocs/tasks/bloc/tasks_bloc.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:hydrated_bloc/hydrated_bloc.dart';
@@ -7,12 +7,6 @@ import 'package:path_provider/path_provider.dart';
 import 'app_router.dart';
 import 'app_themes.dart';
 import 'screens/tabs_screen.dart';
-
-// void main() {
-//   runApp(
-//     MyApp(appRouter: AppRouter()),
-//   );
-// }
 
 Future<void> main() async {
   WidgetsFlutterBinding.ensureInitialized();
@@ -30,18 +24,19 @@ class MyApp extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return BlocProvider<ThemeCubit>(
-      create: (_) => ThemeCubit(),
-      child: BlocBuilder<ThemeCubit, bool>(builder: (context, state) {
-        return MaterialApp(
-          title: 'BloC Tasks App',
-          theme: state
-              ? AppThemes.appThemeData[AppTheme.darkMode]
-              : AppThemes.appThemeData[AppTheme.lightMode],
-          home: const TabsScreen(),
-          onGenerateRoute: appRouter.onGenerateRoute,
-        );
-      }),
+    return MultiBlocProvider(
+      providers: [
+        BlocProvider(create: (context) => TasksBloc()..add(ShowTasks()))
+      ],
+      child: MaterialApp(
+        debugShowCheckedModeBanner: false,
+        title: 'BloC Tasks App',
+        theme:
+            // state ? AppThemes.appThemeData[AppTheme.darkMode] :
+            AppThemes.appThemeData[AppTheme.lightMode],
+        home: const TabsScreen(),
+        onGenerateRoute: appRouter.onGenerateRoute,
+      ),
     );
   }
 }
