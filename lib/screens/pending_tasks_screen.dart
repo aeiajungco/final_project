@@ -10,7 +10,7 @@ class PendingTasksScreen extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return BlocBuilder<TasksBloc, TasksState>(
+    return BlocBuilder<TasksBloc, TaskManager>(
       builder: (context, state) {
         return Padding(
           padding: const EdgeInsets.symmetric(vertical: 8, horizontal: 16),
@@ -20,7 +20,7 @@ class PendingTasksScreen extends StatelessWidget {
               Center(
                 child: Chip(
                   label: Text(
-                    '${state.tasksList.length} Pending | ${TestData.completedTasks.length} Completed',
+                    '${state.tasksList.length} Pending | ${state.completedTasks.length} Completed',
                   ),
                 ),
               ),

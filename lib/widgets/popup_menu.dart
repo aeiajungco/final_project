@@ -1,4 +1,6 @@
+import 'package:bloc_finals_exam/blocs/tasks/bloc/tasks_bloc.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter_bloc/flutter_bloc.dart';
 
 import '../models/task.dart';
 
@@ -31,7 +33,7 @@ class PopupMenu extends StatelessWidget {
       PopupMenuItem(
         onTap: likeOrDislikeCallback,
         child: TextButton.icon(
-          onPressed: null,
+          onPressed: likeOrDislikeCallback,
           icon: task.isFavorite == false
               ? const Icon(Icons.bookmark_add_outlined)
               : const Icon(Icons.bookmark_remove_outlined),
@@ -43,7 +45,7 @@ class PopupMenu extends StatelessWidget {
       PopupMenuItem(
         onTap: cancelOrDeleteCallback,
         child: TextButton.icon(
-          onPressed: null,
+          onPressed: cancelOrDeleteCallback,
           icon: const Icon(Icons.delete),
           label: const Text('Delete'),
         ),
@@ -56,7 +58,7 @@ class PopupMenu extends StatelessWidget {
       PopupMenuItem(
         onTap: restoreTaskCallback,
         child: TextButton.icon(
-          onPressed: null,
+          onPressed: restoreTaskCallback,
           icon: const Icon(Icons.restore_from_trash),
           label: const Text('Restore'),
         ),
@@ -64,7 +66,7 @@ class PopupMenu extends StatelessWidget {
       PopupMenuItem(
         onTap: cancelOrDeleteCallback,
         child: TextButton.icon(
-          onPressed: null,
+          onPressed: cancelOrDeleteCallback,
           icon: const Icon(Icons.delete_forever),
           label: const Text('Delete Forever'),
         ),
@@ -74,11 +76,16 @@ class PopupMenu extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return PopupMenuButton(
-      icon: const Icon(Icons.more_vert),
-      itemBuilder: (context) => task.isDeleted!
-          ? getRecycleBinTaskMenuItems()
-          : getActiveTaskMenuItems(),
+    return BlocListener<TasksBloc, TasksState>(
+      listener: (context, state) {
+        
+      },
+      child: PopupMenuButton(
+        icon: const Icon(Icons.more_vert),
+        itemBuilder: (context) => task.isDeleted!
+            ? getRecycleBinTaskMenuItems()
+            : getActiveTaskMenuItems(),
+      ),
     );
   }
 }

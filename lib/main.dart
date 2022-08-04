@@ -1,4 +1,5 @@
 import 'package:bloc_finals_exam/blocs/tasks/bloc/tasks_bloc.dart';
+import 'package:bloc_finals_exam/blocs/theme/bloc/theme_bloc.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:hydrated_bloc/hydrated_bloc.dart';
@@ -10,11 +11,11 @@ import 'screens/tabs_screen.dart';
 
 Future<void> main() async {
   WidgetsFlutterBinding.ensureInitialized();
-  final storage = await HydratedStorage.build(
-      storageDirectory: await getApplicationDocumentsDirectory());
+  // final storage = await HydratedStorage.build(
+  //     storageDirectory: await getApplicationDocumentsDirectory());
 
-  HydratedBlocOverrides.runZoned(() => runApp(MyApp(appRouter: AppRouter())),
-      storage: storage);
+  HydratedBlocOverrides.runZoned(() => runApp(MyApp(appRouter: AppRouter())));
+  // storage: storage);
 }
 
 class MyApp extends StatelessWidget {
@@ -26,16 +27,21 @@ class MyApp extends StatelessWidget {
   Widget build(BuildContext context) {
     return MultiBlocProvider(
       providers: [
-        BlocProvider(create: (context) => TasksBloc()..add(ShowTasks()))
+        BlocProvider(create: (context) => TasksBloc()..add(ShowTasks())),
+        BlocProvider(create: (context) => ThemeBloc())
       ],
-      child: MaterialApp(
-        debugShowCheckedModeBanner: false,
-        title: 'BloC Tasks App',
-        theme:
-            // state ? AppThemes.appThemeData[AppTheme.darkMode] :
-            AppThemes.appThemeData[AppTheme.lightMode],
-        home: const TabsScreen(),
-        onGenerateRoute: appRouter.onGenerateRoute,
+      child: BlocBuilder<ThemeBloc, ThemeState>(
+        builder: (context, state) {
+          return MaterialApp(
+            debugShowCheckedModeBanner: false,
+            title: 'BloC Tasks App',
+            theme: state.isDarkTheme
+                ? AppThemes.appThemeData[AppTheme.darkMode]
+                : AppThemes.appThemeData[AppTheme.lightMode],
+            home: const TabsScreen(),
+            onGenerateRoute: appRouter.onGenerateRoute,
+          );
+        },
       ),
     );
   }
