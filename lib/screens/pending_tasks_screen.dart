@@ -20,7 +20,7 @@ class PendingTasksScreen extends StatelessWidget {
               Center(
                 child: Chip(
                   label: Text(
-                    '${state.tasksList.length} Pending | ${TestData.completedTasks.length} Completed',
+                    '${state.tasksList.length} Pending | ${state.completedTasks.length} Completed',
                   ),
                 ),
               ),
