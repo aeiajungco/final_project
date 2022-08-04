@@ -10,7 +10,7 @@ class PendingTasksScreen extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return BlocBuilder<TasksBloc, TaskManager>(
+    return BlocBuilder<TasksBloc, TasksState>(
       builder: (context, state) {
         return Padding(
           padding: const EdgeInsets.symmetric(vertical: 8, horizontal: 16),

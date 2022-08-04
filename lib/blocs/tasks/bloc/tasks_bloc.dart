@@ -1,36 +1,27 @@
 import 'package:bloc/bloc.dart';
 import 'package:equatable/equatable.dart';
 
-import '../../../models/filter.dart';
 import '../../../models/task.dart';
 
 part 'tasks_event.dart';
 part 'tasks_state.dart';
 
-class TasksBloc extends Bloc<TasksEvent, TaskManager> {
-  TasksBloc() : super(const TaskManager()) {
-    on<ShowTasks>(_onShowTasks);
+class TasksBloc extends Bloc<TasksEvent, TasksState> {
+  TasksBloc() : super(const TasksState()) {
     on<AddTask>(_onAddTask);
     on<EditTask>(_onEditTask);
     on<DeleteTask>(_onDeleteTask);
     on<PermaDeleteTask>(_onPermaDeleteTask);
+    on<DeleteAll>(_onDeleteAll);
     on<RestoreTask>(_onRestoreTask);
     on<FavoriteTask>(_onFavoriteTask);
     on<CompleteTask>(_onCompleteTask);
   }
 
-  void _onShowTasks(ShowTasks event, Emitter<TasksState> emit) {
-    emit(TaskManager(
-        tasksList: event.tasksList,
-        deletedTasks: List.from(state.deletedTasks),
-        completedTasks: List.from(state.completedTasks),
-        favoriteTasks: List.from(state.favoriteTasks)));
-  }
-
   void _onAddTask(AddTask event, Emitter<TasksState> emit) {
     final state = this.state;
 
-    emit(TaskManager(
+    emit(TasksState(
         tasksList: List.from(state.tasksList)..add(event.task),
         deletedTasks: List.from(state.deletedTasks),
         completedTasks: List.from(state.completedTasks),
@@ -40,13 +31,20 @@ class TasksBloc extends Bloc<TasksEvent, TaskManager> {
   void _onDeleteTask(DeleteTask event, Emitter<TasksState> emit) {
     final state = this.state;
 
-    List<Task> tasksList = state.tasksList.where((task) {
-      return task.id != event.task.id;
-    }).toList();
+    emit(TasksState(
+        tasksList: List.from(state.tasksList)..remove(event.task),
+        deletedTasks: List.from(state.deletedTasks)
+          ..add(event.task.copyWith(isDeleted: true)),
+        completedTasks: List.from(state.completedTasks)..remove(event.task),
+        favoriteTasks: List.from(state.favoriteTasks)..remove(event.task)));
+  }
 
-    emit(TaskManager(
-        tasksList: tasksList,
-        deletedTasks: List.from(state.deletedTasks)..add(event.task),
+  void _onDeleteAll(DeleteAll event, Emitter<TasksState> emit) {
+    final state = this.state;
+
+    emit(TasksState(
+        tasksList: List.from(state.tasksList),
+        deletedTasks: List.from(state.deletedTasks)..clear(),
         completedTasks: List.from(state.completedTasks),
         favoriteTasks: List.from(state.favoriteTasks)));
   }
@@ -54,13 +52,9 @@ class TasksBloc extends Bloc<TasksEvent, TaskManager> {
   void _onPermaDeleteTask(PermaDeleteTask event, Emitter<TasksState> emit) {
     final state = this.state;
 
-    List<Task> deletedTasks = state.deletedTasks.where((task) {
-      return task.id != event.task.id;
-    }).toList();
-
-    emit(TaskManager(
+    emit(TasksState(
         tasksList: List.from(state.tasksList),
-        deletedTasks: deletedTasks,
+        deletedTasks: List.from(state.deletedTasks)..remove(event.task),
         completedTasks: List.from(state.completedTasks),
         favoriteTasks: List.from(state.favoriteTasks)));
   }
@@ -68,78 +62,135 @@ class TasksBloc extends Bloc<TasksEvent, TaskManager> {
   void _onEditTask(EditTask event, Emitter<TasksState> emit) {
     final state = this.state;
 
-    List<Task> tasksList = state.tasksList.map((task) {
-      // task.copyWith(isDeleted: true);
-      return task.id == event.task.id ? event.task : task;
-    }).toList();
+    List<Task> tasksList = List.from(state.tasksList)..remove(event.task);
+    List<Task> deletedTasks = List.from(state.deletedTasks)..remove(event.task);
+    List<Task> favoriteTasks = List.from(state.favoriteTasks)
+      ..remove(event.task);
+    List<Task> completedTasks = List.from(state.completedTasks)
+      ..remove(event.task);
 
-    emit(TaskManager(
+    if (event.task.isDone == true || event.task.isFavorite == true) {
+      if (event.task.isFavorite == true) {
+        favoriteTasks.insert(0, event.editedTask.copyWith(isFavorite: true));
+        tasksList.insert(0, event.editedTask.copyWith(isFavorite: true));
+      }
+
+      if (event.task.isDone == true) {
+        completedTasks.insert(0, event.editedTask.copyWith(isDone: true));
+        tasksList.insert(0, event.editedTask.copyWith(isDone: true));
+      }
+    } else {
+      tasksList.insert(0, event.editedTask);
+    }
+
+    emit(TasksState(
         tasksList: tasksList,
-        deletedTasks: List.from(state.deletedTasks),
-        completedTasks: List.from(state.completedTasks),
-        favoriteTasks: List.from(state.favoriteTasks)));
+        deletedTasks: deletedTasks,
+        completedTasks: completedTasks,
+        favoriteTasks: favoriteTasks));
   }
 
   void _onRestoreTask(RestoreTask event, Emitter<TasksState> emit) {
     final state = this.state;
+    List<Task> tasksList = List.from(state.tasksList);
+    List<Task> deletedTasks = List.from(state.deletedTasks)..remove(event.task);
+    List<Task> favoriteTasks = List.from(state.favoriteTasks);
+    List<Task> completedTasks = List.from(state.completedTasks);
 
-    List<Task> deletedTasks = state.deletedTasks.where((task) {
-      return task.id != event.task.id;
-    }).toList();
+    if (event.task.isFavorite == true) {
+      favoriteTasks.add(event.task.copyWith(isDeleted: false));
+    }
 
-    emit(TaskManager(
-        tasksList: List.from(state.tasksList)..add(event.task),
+    if (event.task.isDone == true) {
+      completedTasks.add(event.task.copyWith(isDeleted: false));
+    } else {
+      tasksList.add(event.task.copyWith(isDeleted: false));
+    }
+    emit(TasksState(
+        tasksList: tasksList,
         deletedTasks: deletedTasks,
-        completedTasks: List.from(state.completedTasks),
-        favoriteTasks: List.from(state.favoriteTasks)));
+        completedTasks: completedTasks,
+        favoriteTasks: favoriteTasks));
   }
 
   void _onFavoriteTask(FavoriteTask event, Emitter<TasksState> emit) {
     final state = this.state;
+    List<Task> tasksList = List.from(state.tasksList)..remove(event.task);
+    List<Task> deletedTasks = List.from(state.deletedTasks);
+    List<Task> favoriteTasks = List.from(state.favoriteTasks);
+    List<Task> completedTasks = List.from(state.completedTasks);
 
-    List<Task> tasksList = state.tasksList.map((task) {
-      return task.id == event.task.id ? event.task : task;
-    }).toList();
-
-    if (event.status == true) {
-      List<Task> favoriteTasks = state.favoriteTasks.where((task) {
-        return task.id != event.task.id;
-      }).toList();
-      emit(TaskManager(
-          tasksList: tasksList,
-          deletedTasks: List.from(state.deletedTasks),
-          completedTasks: List.from(state.completedTasks),
-          favoriteTasks: favoriteTasks));
+    if (event.task.isFavorite == true) {
+      if (event.task.isDone == true) {
+        completedTasks.remove(event.task);
+        completedTasks.insert(
+            0, event.task.copyWith(isFavorite: false, isDone: true));
+      } else {
+        tasksList.insert(0, event.task.copyWith(isFavorite: false));
+      }
+      favoriteTasks.remove(event.task);
     } else {
-      emit(TaskManager(
-          tasksList: tasksList,
-          deletedTasks: List.from(state.deletedTasks),
-          completedTasks: List.from(state.completedTasks),
-          favoriteTasks: List.from(state.favoriteTasks)..add(event.task)));
+      if (event.task.isDone == true) {
+        favoriteTasks.remove(event.task);
+        favoriteTasks.insert(
+            0, event.task.copyWith(isFavorite: true, isDone: true));
+        completedTasks.remove(event.task);
+        completedTasks.insert(0, event.task.copyWith(isFavorite: true));
+      } else {
+        favoriteTasks.insert(0, event.task.copyWith(isFavorite: true));
+        tasksList.remove(event.task);
+        tasksList.insert(0, event.task.copyWith(isFavorite: true));
+      }
     }
+    emit(TasksState(
+        tasksList: tasksList,
+        deletedTasks: deletedTasks,
+        completedTasks: completedTasks,
+        favoriteTasks: favoriteTasks));
   }
 
   void _onCompleteTask(CompleteTask event, Emitter<TasksState> emit) {
     final state = this.state;
-    List<Task> tasksList = state.tasksList.where((task) {
-      return task.id != event.task.id;
-    }).toList();
+    List<Task> tasksList = List.from(state.tasksList);
+    List<Task> deletedTasks = List.from(state.deletedTasks);
+    List<Task> favoriteTasks = List.from(state.favoriteTasks);
+    List<Task> completedTasks = List.from(state.completedTasks);
 
-    if (event.status == true) {
-      List<Task> completedTasks = state.completedTasks.where((task) {
-        return task.id != event.task.id;
-      }).toList();
-      emit(TaskManager(
-          tasksList: tasksList..add(event.task),
-          deletedTasks: List.from(state.deletedTasks),
-          completedTasks: completedTasks,
-          favoriteTasks: List.from(state.favoriteTasks)));
+    final faveIndex = favoriteTasks.indexOf(event.task);
+
+    if (event.task.isDone == true) {
+      if (event.task.isFavorite == true) {
+        favoriteTasks.remove(event.task);
+        favoriteTasks.insert(faveIndex, event.task.copyWith(isDone: false));
+      }
+      tasksList.insert(0, event.task.copyWith(isDone: false));
+      completedTasks.remove(event.task);
     } else {
-      emit(TaskManager(
-          tasksList: tasksList,
-          deletedTasks: List.from(state.deletedTasks),
-          completedTasks: List.from(state.completedTasks)..add(event.task),
-          favoriteTasks: List.from(state.favoriteTasks)));
+      if (event.task.isFavorite == true) {
+        favoriteTasks.remove(event.task);
+        favoriteTasks.insert(faveIndex, event.task.copyWith(isDone: true));
+        completedTasks.insert(
+            0, event.task.copyWith(isDone: true, isFavorite: true));
+      } else {
+        completedTasks.insert(0, event.task.copyWith(isDone: true));
+      }
+      tasksList.remove(event.task);
     }
+
+    emit(TasksState(
+        tasksList: tasksList,
+        deletedTasks: deletedTasks,
+        completedTasks: completedTasks,
+        favoriteTasks: favoriteTasks));
   }
+}
+
+@override
+TasksState? fromJson(Map<String, dynamic> json) {
+  return TasksState.fromMap(json);
+}
+
+@override
+Map<String, dynamic>? toJson(TasksState state) {
+  return state.toMap();
 }

@@ -13,12 +13,8 @@ class RecycleBinScreen extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    // final List<Task> removedTasks = [
-    //   Task(title: 'Finals exam', description: 'Study for Finals Exam'),
-    //   Task(title: 'Buy groceries', description: 'Don\'t forget the cheese'),
-    // ];
     final Task task;
-    return BlocBuilder<TasksBloc, TaskManager>(
+    return BlocBuilder<TasksBloc, TasksState>(
       builder: (context, state) {
         return Scaffold(
             appBar: AppBar(
@@ -34,7 +30,7 @@ class RecycleBinScreen extends StatelessWidget {
                         label: const Text('Delete all tasks'),
                       ),
                       onTap: () {
-                        // context.read<TasksBloc>().add(PermaDeleteTask());
+                        context.read<TasksBloc>().add(const DeleteAll());
                       },
                     ),
                   ],

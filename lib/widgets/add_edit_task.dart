@@ -19,6 +19,7 @@ class AddEditTask extends StatefulWidget {
 class _AddEditTaskState extends State<AddEditTask> {
   late String _title;
   late String _description;
+  late Task oldTask;
 
   @override
   void initState() {
@@ -27,6 +28,7 @@ class _AddEditTaskState extends State<AddEditTask> {
     if (task != null) {
       _title = task.title;
       _description = task.description;
+      oldTask = task;
     } else {
       _title = '';
       _description = '';
@@ -91,23 +93,20 @@ class _AddEditTaskState extends State<AddEditTask> {
                 ),
                 ElevatedButton(
                   onPressed: _title.isNotEmpty && _description.isNotEmpty
-                      ? widget.task == null
-                          ? () {
-                              var task = Task(
-                                  title: _title, description: _description);
-                              context
+                      ? () {
+                          var task =
+                              Task(title: _title, description: _description);
+
+                          widget.task == null
+                              ? context
                                   .read<TasksBloc>()
-                                  .add(AddTask(task: task));
-                              Navigator.pop(context);
-                            }
-                          : () {
-                              var task = Task(
-                                  title: _title, description: _description);
-                              context
+                                  .add(AddTask(task: task))
+                              : context
                                   .read<TasksBloc>()
-                                  .add(EditTask(task: task));
-                              Navigator.pop(context);
-                            }
+                                  .add(EditTask(task: oldTask, editedTask: task));
+
+                          Navigator.pop(context);
+                        }
                       : null,
                   child: widget.task == null
                       ? const Text('Add')

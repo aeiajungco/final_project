@@ -29,7 +29,7 @@ class TaskTile extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return BlocBuilder<TasksBloc, TaskManager>(
+    return BlocBuilder<TasksBloc, TasksState>(
       builder: (context, state) {
         return Row(
           mainAxisAlignment: MainAxisAlignment.spaceBetween,
@@ -74,35 +74,28 @@ class TaskTile extends StatelessWidget {
                     onChanged: (value) {
                       task.isDeleted!
                           ? null
-                          : context.read<TasksBloc>().add(CompleteTask(
-                              task: task.copyWith(isDone: !task.isDone!),
-                              status: task.isDone!));
+                          : context
+                              .read<TasksBloc>()
+                              .add(CompleteTask(task: task));
                     }),
                 PopupMenu(
                   task: task,
                   editCallback: () {
-                    _editTask(context);
                     Navigator.pop(context);
+                    task.isDone! ? null : _editTask(context);
                   },
                   likeOrDislikeCallback: () {
-                    context.read<TasksBloc>().add(FavoriteTask(
-                        task: task.copyWith(isFavorite: !task.isFavorite!),
-                        status: task.isFavorite!));
-
-                    print('favorite is ${task.isFavorite}');
+                    context.read<TasksBloc>().add(FavoriteTask(task: task));
                   },
                   cancelOrDeleteCallback: () {
                     !task.isDeleted!
-                        ? context.read<TasksBloc>().add(
-                            DeleteTask(task: task.copyWith(isDeleted: true)))
+                        ? context.read<TasksBloc>().add(DeleteTask(task: task))
                         : context
                             .read<TasksBloc>()
                             .add(PermaDeleteTask(task: task));
-                    print('task is ${task.isDeleted}');
                   },
                   restoreTaskCallback: () {
-                    context.read<TasksBloc>().add(
-                        RestoreTask(task: task.copyWith(isDeleted: false)));
+                    context.read<TasksBloc>().add(RestoreTask(task: task));
                   },
                 ),
               ],

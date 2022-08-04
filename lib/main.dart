@@ -11,11 +11,11 @@ import 'screens/tabs_screen.dart';
 
 Future<void> main() async {
   WidgetsFlutterBinding.ensureInitialized();
-  // final storage = await HydratedStorage.build(
-  //     storageDirectory: await getApplicationDocumentsDirectory());
+  final storage = await HydratedStorage.build(
+      storageDirectory: await getApplicationDocumentsDirectory());
 
-  HydratedBlocOverrides.runZoned(() => runApp(MyApp(appRouter: AppRouter())));
-  // storage: storage);
+  HydratedBlocOverrides.runZoned(() => runApp(MyApp(appRouter: AppRouter())),
+      storage: storage);
 }
 
 class MyApp extends StatelessWidget {
@@ -27,7 +27,7 @@ class MyApp extends StatelessWidget {
   Widget build(BuildContext context) {
     return MultiBlocProvider(
       providers: [
-        BlocProvider(create: (context) => TasksBloc()..add(ShowTasks())),
+        BlocProvider(create: (context) => TasksBloc()),
         BlocProvider(create: (context) => ThemeBloc())
       ],
       child: BlocBuilder<ThemeBloc, ThemeState>(

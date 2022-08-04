@@ -17,7 +17,7 @@ class TasksDrawer extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return BlocBuilder<TasksBloc, TaskManager>(
+    return BlocBuilder<TasksBloc, TasksState>(
       builder: (context, state) {
         return SafeArea(
           child: Drawer(

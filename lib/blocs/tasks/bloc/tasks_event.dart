@@ -23,8 +23,9 @@ class AddTask extends TasksEvent {
 
 class EditTask extends TasksEvent {
   final Task task;
+  final Task editedTask;
 
-  const EditTask({required this.task});
+  const EditTask({required this.task, required this.editedTask});
 
   @override
   List<Object> get props => [task];
@@ -37,6 +38,13 @@ class DeleteTask extends TasksEvent {
 
   @override
   List<Object> get props => [task];
+}
+
+class DeleteAll extends TasksEvent {
+  const DeleteAll();
+
+  @override
+  List<Object> get props => [];
 }
 
 class PermaDeleteTask extends TasksEvent {
@@ -59,9 +67,8 @@ class RestoreTask extends TasksEvent {
 
 class FavoriteTask extends TasksEvent {
   final Task task;
-  final bool status;
 
-  const FavoriteTask({required this.task, required this.status});
+  const FavoriteTask({required this.task});
 
   @override
   List<Object> get props => [task];
@@ -78,9 +85,8 @@ class RemoveFavoriteTask extends TasksEvent {
 
 class CompleteTask extends TasksEvent {
   final Task task;
-  final bool status;
 
-  const CompleteTask({required this.task, required this.status});
+  const CompleteTask({required this.task});
 
   @override
   List<Object> get props => [task];
