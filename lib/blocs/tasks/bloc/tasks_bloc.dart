@@ -1,4 +1,5 @@
 import 'package:bloc/bloc.dart';
+import 'package:hydrated_bloc/hydrated_bloc.dart';
 import 'package:equatable/equatable.dart';
 
 import '../../../models/task.dart';
@@ -6,7 +7,7 @@ import '../../../models/task.dart';
 part 'tasks_event.dart';
 part 'tasks_state.dart';
 
-class TasksBloc extends Bloc<TasksEvent, TasksState> {
+class TasksBloc extends HydratedBloc<TasksEvent, TasksState> {
   TasksBloc() : super(const TasksState()) {
     on<AddTask>(_onAddTask);
     on<EditTask>(_onEditTask);
@@ -183,14 +184,14 @@ class TasksBloc extends Bloc<TasksEvent, TasksState> {
         completedTasks: completedTasks,
         favoriteTasks: favoriteTasks));
   }
-}
 
-@override
-TasksState? fromJson(Map<String, dynamic> json) {
-  return TasksState.fromMap(json);
-}
+  @override
+  TasksState? fromJson(Map<String, dynamic> json) {
+    return TasksState.fromMap(json);
+  }
 
-@override
-Map<String, dynamic>? toJson(TasksState state) {
-  return state.toMap();
+  @override
+  Map<String, dynamic>? toJson(TasksState state) {
+    return state.toMap();
+  }
 }
