@@ -63,24 +63,18 @@ class TasksBloc extends HydratedBloc<TasksEvent, TasksState> {
   void _onEditTask(EditTask event, Emitter<TasksState> emit) {
     final state = this.state;
 
-    List<Task> tasksList = List.from(state.tasksList)..remove(event.task);
-    List<Task> deletedTasks = List.from(state.deletedTasks)..remove(event.task);
-    List<Task> favoriteTasks = List.from(state.favoriteTasks)
-      ..remove(event.task);
-    List<Task> completedTasks = List.from(state.completedTasks)
-      ..remove(event.task);
+    List<Task> tasksList = List.from(state.tasksList);
+    List<Task> deletedTasks = List.from(state.deletedTasks);
+    List<Task> favoriteTasks = List.from(state.favoriteTasks);
+    List<Task> completedTasks = List.from(state.completedTasks);
 
-    if (event.task.isDone == true || event.task.isFavorite == true) {
-      if (event.task.isFavorite == true) {
-        favoriteTasks.insert(0, event.editedTask.copyWith(isFavorite: true));
-        tasksList.insert(0, event.editedTask.copyWith(isFavorite: true));
-      }
-
-      if (event.task.isDone == true) {
-        completedTasks.insert(0, event.editedTask.copyWith(isDone: true));
-        tasksList.insert(0, event.editedTask.copyWith(isDone: true));
-      }
+    if (event.task.isFavorite == true) {
+      favoriteTasks.remove(event.task);
+      favoriteTasks.insert(0, event.editedTask.copyWith(isFavorite: true));
+      tasksList.remove(event.task);
+      tasksList.insert(0, event.editedTask.copyWith(isFavorite: true));
     } else {
+      tasksList.remove(event.task);
       tasksList.insert(0, event.editedTask);
     }
 

@@ -29,9 +29,7 @@ class TaskTile extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return BlocBuilder<TasksBloc, TasksState>(
-      builder: (context, state) {
-        return Row(
+    return Row(
           mainAxisAlignment: MainAxisAlignment.spaceBetween,
           children: [
             const SizedBox(width: 16),
@@ -102,7 +100,6 @@ class TaskTile extends StatelessWidget {
             ),
           ],
         );
-      },
-    );
+      }
   }
-}
+

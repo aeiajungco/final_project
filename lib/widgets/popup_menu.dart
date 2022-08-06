@@ -76,16 +76,11 @@ class PopupMenu extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return BlocListener<TasksBloc, TasksState>(
-      listener: (context, state) {
-        
-      },
-      child: PopupMenuButton(
-        icon: const Icon(Icons.more_vert),
-        itemBuilder: (context) => task.isDeleted!
-            ? getRecycleBinTaskMenuItems()
-            : getActiveTaskMenuItems(),
-      ),
+    return PopupMenuButton(
+      icon: const Icon(Icons.more_vert),
+      itemBuilder: (context) => task.isDeleted!
+          ? getRecycleBinTaskMenuItems()
+          : getActiveTaskMenuItems(),
     );
   }
 }
